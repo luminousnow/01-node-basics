@@ -1,26 +1,32 @@
+const { argv } = require("yargs");
 const {
-  contactsPath,
   listContacts,
   getContactById,
   removeContact,
   addContact,
 } = require("./contacts");
 
-console.log(contactsPath);
+function invokeAction({ action, id, name, email, phone }) {
+  switch (action) {
+    case "list":
+      listContacts();
+      break;
 
-// const fs = require("fs").promises;
+    case "get":
+      getContactById(id);
+      break;
 
-// fs.readdir(__dirname)
-//   .then((files) => {
-//     return Promise.all(
-//       files.map(async (filename) => {
-//         const stats = await fs.stat(filename);
-//         return {
-//           Name: filename,
-//           Size: stats.size,
-//           Date: stats.mtime,
-//         };
-//       })
-//     );
-//   })
-//   .then((result) => console.table(result));
+    case "remove":
+      removeContact(id);
+      break;
+
+    case "add":
+      addContact(name, email, phone);
+      break;
+
+    default:
+      console.warn("\x1B[31m Unknown action type!");
+  }
+}
+
+invokeAction(argv);
