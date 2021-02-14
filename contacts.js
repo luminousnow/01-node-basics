@@ -2,13 +2,14 @@ const { readFile, writeFile } = require("fs/promises");
 const path = require("path");
 const ID = require("nodejs-unique-numeric-id-generator");
 
-// DB url to contacts.json file
+// === DB ===
 const contactsPath = path.join("db", "contacts.json");
 
 // === GET all contacts ===
 async function listContacts() {
   try {
-    const contctList = JSON.parse(await readFile(contactsPath, "utf8"));
+    const jsonString = await readFile(contactsPath, "utf8");
+    const contctList = JSON.parse(jsonString);
 
     console.log("Seccess! Here is the All contact from contacts.json");
     console.table(contctList);
@@ -20,7 +21,9 @@ async function listContacts() {
 // === GET contact by ID ===
 async function getContactById(contactId) {
   try {
-    JSON.parse(await readFile(contactsPath, "utf8")).filter((contact) => {
+    const jsonString = await readFile(contactsPath, "utf8");
+
+    JSON.parse(jsonString).filter((contact) => {
       if (contact.id === contactId) {
         console.log("Seccess! You got it");
         console.table([contact]);
@@ -34,11 +37,12 @@ async function getContactById(contactId) {
 // === REMOVE contact by ID ===
 async function removeContact(contactId) {
   try {
-    const toRemove = JSON.parse(await readFile(contactsPath, "utf8")).filter(
-      (contact) => contact.id === contactId
+    const jsonString = await readFile(contactsPath, "utf8");
+    const toRemove = JSON.parse(jsonString).filter(
+      ({ id }) => id === contactId
     );
-    const contctList = JSON.parse(await readFile(contactsPath, "utf8")).filter(
-      (contact) => contact.id !== contactId
+    const contctList = JSON.parse(jsonString).filter(
+      ({ id }) => id !== contactId
     );
 
     // write a new collection of contact to contacts.json
@@ -51,8 +55,10 @@ async function removeContact(contactId) {
   }
 }
 
+// === ADD new contact ===
 async function addContact(name, email, phone) {
   try {
+    const jsonString = await readFile(contactsPath, "utf8");
     const id = await Number(ID.generate(new Date().toJSON()));
     const contact = {
       id,
@@ -60,12 +66,9 @@ async function addContact(name, email, phone) {
       email,
       phone,
     };
-    const contctList = [
-      ...JSON.parse(await readFile(contactsPath, "utf8")),
-      contact,
-    ];
+    const contctList = [...JSON.parse(jsonString), contact];
 
-    // create new collection whis a new contact adn write to contacts.json
+    // create new collection and write to contacts.json
     await writeFile(contactsPath, JSON.stringify(contctList));
 
     console.log("Seccess! The new contact was add to contacts.json");
